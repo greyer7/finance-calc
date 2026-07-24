@@ -1,0 +1,51 @@
+# --- Environment ---
+.env
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+build/
+.vite/
+*.local
+
+# --- Docker / volumes ---
+postgres_data/
+redis_data/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Misc ---
+*.bak
+*.tmp
