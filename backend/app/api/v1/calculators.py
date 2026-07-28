@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -15,6 +15,7 @@ from app.schemas.calculator import (
     CompoundInterestResponse,
     InflationRequest,
     InflationResponse,
+    CalculationHistoryItem,
 )
 
 router = APIRouter(prefix="/calculate", tags=["calculators"])
@@ -85,5 +86,24 @@ async def delete_calculation(
     current_user: User = Depends(get_current_verified_user),
 ):
     calc_service = CalculationService(db)
-    await calc_service.delete_calculation(calculation_id, current_user.id)
+    deleted = await calc_service.delete_calculation(calculation_id, current_user.id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Calculation not found")
     return None
+
+
+@router.get("/history", response_model=List[CalculationHistoryItem])
+async def get_calculation_history(
+    calculation_type: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_verified_user),
+):
+    calc_service = CalculationService(db)
+    return await calc_service.get_user_history(
+        user_id=current_user.id,
+        calculation_type=calculation_type,
+        limit=limit,
+        offset=offset,
+    )

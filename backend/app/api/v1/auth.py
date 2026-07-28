@@ -13,12 +13,14 @@ from app.schemas.auth import (
     ResendVerificationRequest,
 )
 from app.services.auth_service import AuthService
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def register(request: Request, data: UserCreate, db: AsyncSession = Depends(get_db)):
     auth_service = AuthService(db)
     user = await auth_service.register_user(data)
     return user
@@ -39,6 +41,7 @@ async def resend_verification(data: ResendVerificationRequest, db: AsyncSession 
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/minute")
 async def login(data: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     auth_service = AuthService(db)
     user = await auth_service.authenticate_user(data)
@@ -46,6 +49,7 @@ async def login(data: LoginRequest, request: Request, db: AsyncSession = Depends
 
 
 @router.post("/refresh", response_model=TokenResponse)
+@limiter.limit("20/minute")
 async def refresh(data: RefreshTokenRequest, request: Request, db: AsyncSession = Depends(get_db)):
     auth_service = AuthService(db)
     return await auth_service.refresh_tokens(data.refresh_token, request)

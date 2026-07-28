@@ -40,3 +40,5 @@ factory-boy==3.3.1
 
 # --- Dev tools ---
 python-multipart==0.0.12
+
+slowapi==0.1.9

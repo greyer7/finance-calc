@@ -1,12 +1,25 @@
 from typing import Optional, List, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from datetime import datetime
+
+class CalculationHistoryItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    calculation_type: str
+    principal: float
+    interest_rate: float
+    term_months: int
+    currency: str
+    result: dict
+    title: Optional[str] = None
+    created_at: datetime
 
 
 #  Спільні "будівельні блоки"
 
 class ScheduleEntry(BaseModel):
-    """Один рядок графіка платежів/нарахувань (один місяць або рік)."""
     period: int                     
     payment: Optional[float] = None  
     principal_part: Optional[float] = None   
