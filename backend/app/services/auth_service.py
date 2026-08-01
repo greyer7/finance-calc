@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -23,6 +24,8 @@ from app.core.security import (
     decode_email_verification_token,
 )
 from app.services.email_service import send_verification_email
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -49,7 +52,12 @@ class AuthService:
         )
 
         verification_token = create_email_verification_token(new_user.id)
-        await send_verification_email(new_user.email, verification_token)
+        try:
+            await send_verification_email(new_user.email, verification_token)
+        except Exception:
+            # Юзера вже створено — не валимо реєстрацію через збій SMTP,
+            # просто логуємо і даємо змогу повторно надіслати лист пізніше.
+            logger.exception("Не вдалося надіслати лист підтвердження для %s", new_user.email)
 
         return new_user
 

@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies import get_current_verified_user
+from app.dependencies import get_current_user, get_current_verified_user
 from app.models.user import User
 from app.services.calculation_service import CalculationService
 from app.schemas.calculator import (
@@ -61,7 +61,7 @@ async def calculate_inflation(
     return await calc_service.calculate_inflation(current_user.id, data)
 
 
-@router.get("/history")
+@router.get("/history", response_model=List[CalculationHistoryItem])
 async def get_calculation_history(
     calculation_type: Optional[str] = None,
     limit: int = 50,
@@ -90,20 +90,3 @@ async def delete_calculation(
     if not deleted:
         raise HTTPException(status_code=404, detail="Calculation not found")
     return None
-
-
-@router.get("/history", response_model=List[CalculationHistoryItem])
-async def get_calculation_history(
-    calculation_type: Optional[str] = None,
-    limit: int = 50,
-    offset: int = 0,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_verified_user),
-):
-    calc_service = CalculationService(db)
-    return await calc_service.get_user_history(
-        user_id=current_user.id,
-        calculation_type=calculation_type,
-        limit=limit,
-        offset=offset,
-    )

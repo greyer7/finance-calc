@@ -1,10 +1,15 @@
 import pytest
+from unittest.mock import patch, AsyncMock
 from httpx import AsyncClient
 from sqlalchemy import select
 
 from app.models.user import User
 from app.core.security import create_email_verification_token, hash_password
 
+@pytest.fixture(autouse=True)
+def mock_email_sending():
+    with patch("app.services.auth_service.send_verification_email", new_callable=AsyncMock):
+        yield
 
 class TestRegister:
     async def test_register_new_user_succeeds(self, client: AsyncClient):

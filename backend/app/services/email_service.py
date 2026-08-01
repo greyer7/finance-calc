@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+import ssl
 
 import aiosmtplib
 from jinja2 import Environment, BaseLoader
@@ -44,6 +45,10 @@ async def send_verification_email(to_email: str, verification_token: str) -> Non
     message.set_content("Щоб підтвердити email, використовуйте HTML-версію цього листа.")
     message.add_alternative(html_content, subtype="html")
 
+    tls_context = ssl.create_default_context()
+    tls_context.check_hostname = False
+    tls_context.verify_mode = ssl.CERT_NONE
+
     await aiosmtplib.send(
         message,
         hostname=settings.smtp_host,
@@ -51,4 +56,5 @@ async def send_verification_email(to_email: str, verification_token: str) -> Non
         username=settings.smtp_user,
         password=settings.smtp_password,
         start_tls=True,
+        tls_context=tls_context,
     )

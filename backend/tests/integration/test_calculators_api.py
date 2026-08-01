@@ -187,7 +187,7 @@ class TestCalculationHistory:
         delete_response = await client.delete(
             f"/api/v1/calculate/history/{calculation_id}", headers=headers
         )
-        assert delete_response.status_code == 404
+        assert delete_response.status_code == 204
 
         history_after = await client.get("/api/v1/calculate/history", headers=headers)
         assert len(history_after.json()) == 0
@@ -212,7 +212,7 @@ class TestCalculationHistory:
             headers={"Authorization": f"Bearer {token2}"},
         )
 
-        assert delete_response.status_code == 204
+        assert delete_response.status_code == 404
 
         owner_history = await client.get(
             "/api/v1/calculate/history", headers={"Authorization": f"Bearer {token1}"}
